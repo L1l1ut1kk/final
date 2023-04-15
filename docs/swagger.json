@@ -1,0 +1,102 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Images management service API in Go using Gin framework.",
+        "title": "Gin image Service",
+        "contact": {
+            "name": "l1l1ut1kk"
+        },
+        "license": {
+            "name": "Ubuntu 22.04"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/hello": {
+            "get": {
+                "description": "first request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hello"
+                ],
+                "summary": "Get hello",
+                "responses": {
+                    "200": {
+                        "description": "hello"
+                    }
+                }
+            }
+        },
+        "/photos": {
+            "get": {
+                "description": "Get the 3 latest uploaded photos with original and negative copies",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Get latest uploaded photos",
+                "operationId": "photo.getLatest",
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Upload image and create negative copy",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Upload and convert image to negative",
+                "operationId": "file.upload",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Image to be uploaded",
+                        "name": "photo",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
