@@ -15,7 +15,7 @@ import (
 // @Produce json
 // @Success 200 "ok"
 // @Failure 500 string string "Internal Server Error"
-// @Router /photos [get]
+// @Router /get_last_images [get]
 // @Tags            photos
 func GetLatestPhotos(c *gin.Context) {
 	var photos []models.Image

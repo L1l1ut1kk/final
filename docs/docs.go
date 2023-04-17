@@ -21,24 +21,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello": {
-            "get": {
-                "description": "first request",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "hello"
-                ],
-                "summary": "Get hello",
-                "responses": {
-                    "200": {
-                        "description": "hello"
-                    }
-                }
-            }
-        },
-        "/photos": {
+        "/get_last_images": {
             "get": {
                 "description": "Get the 3 latest uploaded photos with original and negative copies",
                 "produces": [
@@ -60,7 +43,26 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/hello": {
+            "get": {
+                "description": "first request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hello"
+                ],
+                "summary": "Get hello",
+                "responses": {
+                    "200": {
+                        "description": "hello"
+                    }
+                }
+            }
+        },
+        "/negative_image": {
             "post": {
                 "description": "Upload image and create negative copy",
                 "consumes": [

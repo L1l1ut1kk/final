@@ -27,7 +27,7 @@ type Controller struct {
 //  @Success        200     string     string  "ok"
 //  @Failure        400     string     string  "Bad Request"
 //  @Failure        500     string     string  "Internal Server Error"
-//  @Router         /photos [post]
+//  @Router         /negative_image [post]
 //  @Tags            photos
 func SavePhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
