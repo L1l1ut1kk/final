@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/http"
 	control "rest/src/controllers"
+
+	//_"rest/bootstrat"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -34,9 +37,15 @@ func Hello_req(c *gin.Context) {
 func main() {
 
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
 
 	// The url pointing to API definition
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Main website",
+		})
+	})
 
 	v1 := r.Group("/api/v1")
 	{
