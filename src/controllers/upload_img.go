@@ -3,11 +3,13 @@ package control
 import (
 	"image"
 	"image/jpeg"
+	"image/png"
 	"net/http"
 	"os"
 	"path/filepath"
 	"rest/pkg"
 	"rest/src/models"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -56,16 +58,23 @@ func SavePhoto(c *gin.Context) {
 	defer f.Close()
 
 	// decode the img
-	img, _, err := image.Decode(f)
+	var img image.Image
+	if strings.HasSuffix(file.Filename, ".png") {
+		img, err = png.Decode(f)
+	} else if strings.HasSuffix(file.Filename, ".jpg") || strings.HasSuffix(file.Filename, ".jpeg") {
+		img, err = jpeg.Decode(f)
+	}
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "4! " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	negative := pkg.CreateNegativeImage(img)
 
 	// create a new file for the negative
-	negativeFilename := ID + ".jpg"
+	negativeFilename := ID + "neg.jpg"
+	negativePath := "uploads/" + negativeFilename
 	negativeFile, err := os.Create("uploads/" + negativeFilename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "5! " + err.Error()})
@@ -78,6 +87,9 @@ func SavePhoto(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "6! " + err.Error()})
 		return
 	}
+	// save pic  for your pc //pkg.DownloadFile(c, negativePath, negativeFilename)
+	pkg.SaveResponseToJsonFile(c, "uploads/"+filename, negativePath, ID, negative)
+	pkg.DownloadFile(c, "response.json", "response.json")
 
 	// save path in database
 	photo := models.Image{Path_or: "uploads/" + filename, Path_neg: "uploads/" + negativeFilename, ID: ID}
@@ -88,4 +100,5 @@ func SavePhoto(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "File uploaded and negative created successfully"})
+
 }

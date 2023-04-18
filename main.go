@@ -37,25 +37,16 @@ func Hello_req(c *gin.Context) {
 func main() {
 
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("src/templates/*")
 
 	// The url pointing to API definition
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "Main website",
-		})
+		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
-	v1 := r.Group("/api/v1")
-	{
-		test := v1.Group("/post_req")
-		{
-			test.POST("/negative_image", control.SavePhoto)
-			test.GET("/get_last_images", control.GetLatestPhotos)
-		}
-	}
-	r.GET("/hello", Hello_req)
+	r.POST("/negative_image", control.SavePhoto)
+	r.GET("/get_last_images", control.GetLatestPhotos)
 	r.Run(":8080")
 
 }

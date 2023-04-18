@@ -7,7 +7,7 @@ import (
 
 func Database() *gorm.DB {
 
-	db, err := gorm.Open(sqlite.Open("images.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("src/models/images.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
