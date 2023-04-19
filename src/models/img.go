@@ -6,7 +6,8 @@ import (
 
 type Image struct {
 	gorm.Model
-	ID       string `gorm:"unique_index"`
-	Path_or  string `gorm:"not null"`
-	Path_neg string `gorm:"not null"`
+	ID        string `gorm:"unique_index"`
+	Path_or   string `gorm:"not null"`
+	Path_neg  string `gorm:"not null"`
+	ImgBase64 string `gorm:"type:text"`
 }

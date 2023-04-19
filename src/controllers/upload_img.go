@@ -1,6 +1,8 @@
 package control
 
 import (
+	"bytes"
+	"encoding/base64"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -74,7 +76,7 @@ func SavePhoto(c *gin.Context) {
 
 	// create a new file for the negative
 	negativeFilename := ID + "neg.jpg"
-	negativePath := "uploads/" + negativeFilename
+	//negativePath := "uploads/" + negativeFilename
 	negativeFile, err := os.Create("uploads/" + negativeFilename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "5! " + err.Error()})
@@ -88,17 +90,22 @@ func SavePhoto(c *gin.Context) {
 		return
 	}
 	// save pic  for your pc //pkg.DownloadFile(c, negativePath, negativeFilename)
-	pkg.SaveResponseToJsonFile(c, "uploads/"+filename, negativePath, ID, negative)
-	pkg.DownloadFile(c, "response.json", "response.json")
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, negative, nil); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "8! " + err.Error()})
+		return
+	}
+	imgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
+	//pkg.DownloadFile(c, "response.json", "response.json")
 
 	// save path in database
-	photo := models.Image{Path_or: "uploads/" + filename, Path_neg: "uploads/" + negativeFilename, ID: ID}
+	photo := models.Image{Path_or: "uploads/" + filename, Path_neg: "uploads/" + negativeFilename, ID: ID, ImgBase64: imgBase64}
 	if err := models.Database().Create(&photo).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "7! " + err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "File uploaded and negative created successfully"})
+	c.JSON(http.StatusOK, gin.H{"ImgBase64": imgBase64})
 
 }

@@ -14,7 +14,82 @@
           </div>
           <button type="submit" class="btn btn-primary">Upload</button>
         </form>
+
+        <!-- вывод изображения -->
+        <div>
+            <img id="preview-img" src="" alt="image preview">
+        </div>
     </div>
+
+    <script>
+        // получаем поле input для загрузки файла
+        const photoInput = document.getElementById('photo');
+
+        // добавляем обработчик изменения поля input
+        photoInput.addEventListener('change', () => {
+            // получаем файл из поля input
+            const file = photoInput.files[0];
+
+            // создаем объект FileReader для чтения файла
+            const reader = new FileReader();
+
+            // добавляем обработчик загрузки файла
+            reader.addEventListener('load', () => {
+                // получаем содержимое файла в формате base64
+                const imageData = reader.result;
+
+                // изменяем размер изображения до 400 на 400 пикселей
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = () => {
+                    const scale = Math.max(400 / img.width, 400 / img.height);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const resizedImageData = canvas.toDataURL(file.type);
+                    // выводим измененное изображение
+                    const imgElement = document.getElementById('preview-img');
+                    imgElement.src = resizedImageData;
+                };
+                img.src = imageData;
+            });
+
+            // читаем файл в формате base64
+            reader.readAsDataURL(file);
+        });
+    </script>
+
+    <script>
+        // отправляем форму на сервер
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // отправляем данные на сервер
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/negative_image');
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    // получаем ответ от сервера
+                    const response = JSON.parse(xhr.responseText);
+
+                    // выводим изображение
+                    const imgElement = document.getElementById('preview-img');
+                    imgElement.src = `data:image/jpeg;base64,${response.ImgBase64}`;
+                } else {
+                    // выводим ошибку
+                    alert('Error: ' + xhr.statusText);
+                }
+            };
+            xhr.onerror = () => {
+                // выводим ошибку
+                alert('Error: ' + xhr.statusText);
+            };
+            const formData = new FormData(form);
+            xhr.send(formData);
+        });
+    </script>
+
 </body>
 </html>
-  
