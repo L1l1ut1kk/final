@@ -15,18 +15,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// GetHello            godoc
-// @Summary      Get hello
-// @Description  first request
-// @Tags         hello
-// @Produce      json
-// @Success      200 "hello"
-// @Router       /hello [get]
-func Hello_req(c *gin.Context) {
-	c.JSON(200, gin.H{"good": "hello"})
-	//return
-}
-
 // @title           Gin image Service
 // @version         1.0
 // @description     Images management service API in Go using Gin framework.
