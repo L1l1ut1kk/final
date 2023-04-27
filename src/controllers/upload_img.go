@@ -97,7 +97,7 @@ func SavePhoto(c *gin.Context) {
 	imgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	// insert data into the database
-	err = models.DBInsert(ID, filename, negativeFilename, imgBase64)
+	err = models.DBInsert(ID, filename, negativeFilename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert data into database: " + err.Error()})
 		return

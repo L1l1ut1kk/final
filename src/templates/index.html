@@ -47,47 +47,46 @@
 			gap: 20px;
 		}
 	</style>
-   <script>
+  <script>
+
     var refreshBtn = document.getElementById("refresh-btn");
     var imagesContainer = document.getElementById("images-container");
 
     refreshBtn.addEventListener("click", function() {
-        // Send a request to the server to get the latest images
-        fetch("/get_last_images")
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(images) {
-                // Clear the images container
-                imagesContainer.innerHTML = "";
+    // Send a request to the server to get the latest images
+    fetch("/get_latest_photos")
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            // Clear the images container
+            imagesContainer.innerHTML = "";
 
-                // Add each image to the container
-                images.forEach(function(image) {
-                    var img = new Image();
-                    img.src = "data:image/png;base64," + image.img_base64;
-                    img.alt = "Image " + image.id;
-                    img.style.width = "300px"; // set the image size
-                    img.style.height = "300px";
-                    
-                    var downloadBtn = document.createElement("a");
-                    downloadBtn.innerText = "Download";
-                    downloadBtn.href = "data:image/png;base64," + image.img_base64;
-                    downloadBtn.download = "image_" + image.id + ".png";
-                    
-                    var div = document.createElement("div");
-                    div.appendChild(img);
-                    div.appendChild(downloadBtn);
-                    imagesContainer.appendChild(div);
-                });
-            })
-            .catch(function(error) {
-                console.error(error);
+            // Add each photo to the container
+            data.images.forEach(function(image) {
+                var img = new Image();
+                img.src = "data:image/png;base64," + image;
+                img.alt = "Image";
+                img.style.width = "300px"; // set the image size
+                img.style.height = "300px";
+
+                var downloadBtn = document.createElement("a");
+                downloadBtn.innerText = "Download";
+                downloadBtn.href = "data:image/png;base64," + image;
+                downloadBtn.download = "image.png";
+
+                var div = document.createElement("div");
+                div.appendChild(img);
+                div.appendChild(downloadBtn);
+                imagesContainer.appendChild(div);
             });
-    });
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+});
 </script>
-    
-    
-      
+   
     <script>
         // получаем поле input для загрузки файла
         const photoInput = document.getElementById('photo');

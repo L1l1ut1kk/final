@@ -26,7 +26,7 @@ func NewRouter() *gin.Engine {
 	})
 
 	r.POST("/negative_image", control.SavePhoto)
-	r.GET("/get_last_images", control.GetLatestPhotos)
+	r.GET("/get_latest_photos", control.GetLatestPhotos)
 
 	return r
 }

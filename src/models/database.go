@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -41,7 +42,7 @@ func DB() {
 	defer db.Close()
 
 	// Создаем таблицу, если ее еще нет
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS images (ID TEXT, Path_or TEXT, Path_neg TEXT, ImgBase64 TEXT)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS images (ID TEXT, Path_or TEXT, Path_neg TEXT, Created_at TIMESTAMP)")
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +50,7 @@ func DB() {
 	fmt.Println("Table created successfully")
 }
 
-func DBInsert(ID string, filename string, negativeFilename string, imgBase64 string) error {
+func DBInsert(ID string, filename string, negativeFilename string) error {
 	// Указываем параметры подключения к базе данных
 	conninfo := "user=postgres password=postgres dbname=images sslmode=disable"
 	db, err := sql.Open("postgres", conninfo)
@@ -59,7 +60,7 @@ func DBInsert(ID string, filename string, negativeFilename string, imgBase64 str
 	defer db.Close()
 
 	// Добавляем данные в таблицу
-	_, err = db.Exec("INSERT INTO images (ID, Path_or, Path_neg, ImgBase64) VALUES ($1, $2, $3, $4)", ID, "uploads/"+filename, "uploads/"+negativeFilename, imgBase64)
+	_, err = db.Exec("INSERT INTO images (ID, Path_or, Path_neg, Created_at) VALUES ($1, $2, $3, $4)", ID, "uploads/"+filename, "uploads/"+negativeFilename, time.Now())
 	if err != nil {
 		return err
 	}

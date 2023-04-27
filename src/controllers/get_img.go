@@ -27,7 +27,8 @@ func GetLatestPhotos(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database: " + err.Error()})
 		return
 	}
-	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY ID DESC LIMIT 3")
+
+	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY Created_at DESC LIMIT 3")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query: " + err.Error()})
 		return
