@@ -13,7 +13,7 @@ func CreateNegativeImage(img image.Image) *image.RGBA {
 	for x := 0; x < bounds.Max.X; x++ {
 		for y := 0; y < bounds.Max.Y; y++ {
 			r, g, b, a := img.At(x, y).RGBA()
-			negative.Set(x, y, color.RGBA{255 - uint8(r), 255 - uint8(g), 255 - uint8(b), uint8(a)})
+			negative.Set(x, y, color.RGBA{uint8(255 - r>>8), uint8(255 - g>>8), uint8(255 - b>>8), uint8(a >> 8)})
 		}
 	}
 

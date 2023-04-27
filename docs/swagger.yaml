@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /
 host: localhost:8080
 info:
   contact:
@@ -8,62 +8,5 @@ info:
     name: Ubuntu 22.04
   title: Gin image Service
   version: "1.0"
-paths:
-  /get_last_images:
-    get:
-      description: Get the 3 latest uploaded photos with original and negative copies
-      operationId: photo.getLatest
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ok
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Get latest uploaded photos
-      tags:
-      - photos
-  /hello:
-    get:
-      description: first request
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: hello
-      summary: Get hello
-      tags:
-      - hello
-  /negative_image:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload image and create negative copy
-      operationId: file.upload
-      parameters:
-      - description: Image to be uploaded
-        in: formData
-        name: photo
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ok
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Upload and convert image to negative
-      tags:
-      - photos
+paths: {}
 swagger: "2.0"

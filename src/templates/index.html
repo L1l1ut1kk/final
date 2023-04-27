@@ -16,11 +16,78 @@
         </form>
 
         <!-- вывод изображения -->
-        <div>
-            <img id="preview-img" src="" alt="image preview">
-        </div>
-    </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Original Image</h2>
+                <img id="preview-img" src="" alt="image preview">
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h2>Negative Image</h2>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <img id="negative-img" src="" alt="negative image preview">
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <button id="download-btn" class="btn btn-primary" disabled>Download Negative Image</button>
+                    </div>
+                </div>
+            </div>
+                <h1>Latest Images</h1>
+                <button id="refresh-btn">Refresh Images</button>
+                <div id="images-container"></div>
+         </div>
 
+    </div>
+    <style>
+		#images-container {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 20px;
+		}
+	</style>
+   <script>
+    var refreshBtn = document.getElementById("refresh-btn");
+    var imagesContainer = document.getElementById("images-container");
+
+    refreshBtn.addEventListener("click", function() {
+        // Send a request to the server to get the latest images
+        fetch("/get_last_images")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(images) {
+                // Clear the images container
+                imagesContainer.innerHTML = "";
+
+                // Add each image to the container
+                images.forEach(function(image) {
+                    var img = new Image();
+                    img.src = "data:image/png;base64," + image.img_base64;
+                    img.alt = "Image " + image.id;
+                    img.style.width = "300px"; // set the image size
+                    img.style.height = "300px";
+                    
+                    var downloadBtn = document.createElement("a");
+                    downloadBtn.innerText = "Download";
+                    downloadBtn.href = "data:image/png;base64," + image.img_base64;
+                    downloadBtn.download = "image_" + image.id + ".png";
+                    
+                    var div = document.createElement("div");
+                    div.appendChild(img);
+                    div.appendChild(downloadBtn);
+                    imagesContainer.appendChild(div);
+                });
+            })
+            .catch(function(error) {
+                console.error(error);
+            });
+    });
+</script>
+    
+    
+      
     <script>
         // получаем поле input для загрузки файла
         const photoInput = document.getElementById('photo');
@@ -43,9 +110,8 @@
                 const ctx = canvas.getContext('2d');
                 const img = new Image();
                 img.onload = () => {
-                    const scale = Math.max(400 / img.width, 400 / img.height);
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
+                    canvas.width = 300;
+                    canvas.height = 300;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const resizedImageData = canvas.toDataURL(file.type);
                     // выводим измененное изображение
@@ -74,9 +140,25 @@
                     // получаем ответ от сервера
                     const response = JSON.parse(xhr.responseText);
 
-                    // выводим изображение
-                    const imgElement = document.getElementById('preview-img');
-                    imgElement.src = `data:image/jpeg;base64,${response.ImgBase64}`;
+                    // создаем изображение
+                    const img = new Image();
+                    img.src = `data:image/jpeg;base64,${response.ImgBase64}`;
+                    img.onload = () => {
+                        // создаем canvas и задаем его размеры
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = 300;
+                        canvas.height = 300;
+                        // рисуем изображение на canvas
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        // получаем измененное изображение в формате base64
+                        const resizedImageData = canvas.toDataURL();
+
+                        // выводим измененное изображение
+                        const imgElement = document.getElementById('negative-img');
+                        imgElement.src = resizedImageData;
+                    };
                 } else {
                     // выводим ошибку
                     alert('Error: ' + xhr.statusText);
@@ -90,6 +172,40 @@
             xhr.send(formData);
         });
     </script>
+    <script>
+        // получаем кнопку "Download Negative Image"
+        const downloadBtn = document.getElementById('download-btn');
 
+        // добавляем обработчик клика на кнопку
+        downloadBtn.addEventListener('click', () => {
+            // получаем измененное изображение
+            const imgElement = document.getElementById('negative-img');
+            const imgData = imgElement.src;
+
+            // создаем ссылку для скачивания изображения
+            const a = document.createElement('a');
+            a.href = imgData;
+            a.download = 'negative-image.jpg';
+
+            // добавляем ссылку на страницу и автоматически нажимаем на нее
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // добавляем обработчик загрузки изображения
+        const previewImg = document.getElementById('preview-img');
+        const negativeImg = document.getElementById('negative-img');
+
+        previewImg.addEventListener('load', () => {
+            // разблокируем кнопку "Download Negative Image"
+            downloadBtn.disabled = false;
+        });
+
+        negativeImg.addEventListener('load', () => {
+            // разблокируем кнопку "Download Negative Image"
+            downloadBtn.disabled = false;
+        });
+    </script>
 </body>
 </html>

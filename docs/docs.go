@@ -20,101 +20,14 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {
-        "/get_last_images": {
-            "get": {
-                "description": "Get the 3 latest uploaded photos with original and negative copies",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "photos"
-                ],
-                "summary": "Get latest uploaded photos",
-                "operationId": "photo.getLatest",
-                "responses": {
-                    "200": {
-                        "description": "ok"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/hello": {
-            "get": {
-                "description": "first request",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "hello"
-                ],
-                "summary": "Get hello",
-                "responses": {
-                    "200": {
-                        "description": "hello"
-                    }
-                }
-            }
-        },
-        "/negative_image": {
-            "post": {
-                "description": "Upload image and create negative copy",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "photos"
-                ],
-                "summary": "Upload and convert image to negative",
-                "operationId": "file.upload",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Image to be uploaded",
-                        "name": "photo",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        }
-    }
+    "paths": {}
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Gin image Service",
 	Description:      "Images management service API in Go using Gin framework.",
