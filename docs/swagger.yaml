@@ -1,4 +1,10 @@
 basePath: /
+definitions:
+  control.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -8,5 +14,57 @@ info:
     name: Ubuntu 22.04
   title: Gin image Service
   version: "1.0"
-paths: {}
+paths:
+  /get_latest_photos:
+    get:
+      consumes:
+      - application/json
+      description: Get the 3 latest uploaded photos with original and negative copies
+      operationId: getLatestPhotos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of base64 encoded images
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/control.ErrorResponse'
+      summary: Get the 3 latest uploaded photos with original and negative copies
+      tags:
+      - photos
+  /negative_image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image and create negative copy
+      operationId: file.upload
+      parameters:
+      - description: Image to be uploaded
+        in: formData
+        name: photo
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Upload and convert image to negative
+      tags:
+      - photos
 swagger: "2.0"

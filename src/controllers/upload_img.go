@@ -14,6 +14,8 @@ import (
 	"rest/src/models"
 	"strings"
 
+	_ "rest/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

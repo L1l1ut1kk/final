@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "rest/docs"
 	"rest/src/models"
 	routes "rest/src/router"
 )

@@ -7,20 +7,25 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	_ "rest/docs"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Get latest photos example
-//
-// @Summary Get latest uploaded photos
-// @Description Get the 3 latest uploaded photos with original and negative copies
-// @ID photo.getLatest
-// @Produce json
-// @Success 200 {array} Image
-// @Failure 500 {object} ErrorResponse
-// @Router /photos/latest [get]
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
 
+// Get latest photos endpoint
+// @Summary Get the 3 latest uploaded photos with original and negative copies
+// @Description Get the 3 latest uploaded photos with original and negative copies
+// @ID getLatestPhotos
+// @Accept json
+// @Produce json
+// @Success 200 {array} string "An array of base64 encoded images"
+// @Failure 500 {object} ErrorResponse
+// @Router /get_latest_photos [get]
+// @Tags photos
 func GetLatestPhotos(c *gin.Context) {
 	conninfo := "user=postgres password=postgres dbname=images sslmode=disable"
 	db, err := sql.Open("postgres", conninfo)
