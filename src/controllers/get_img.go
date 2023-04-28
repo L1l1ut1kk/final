@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,7 @@ func GetLatestPhotos(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database: " + err.Error()})
 		return
 	}
+	defer db.Close()
 
 	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY Created_at DESC LIMIT 3")
 	if err != nil {
@@ -45,7 +47,7 @@ func GetLatestPhotos(c *gin.Context) {
 			return
 		}
 
-		file, err := os.Open(path)
+		file, err := os.Open("/home/lutik/Desktop/api/final/uploads/" + filepath.Base(path))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file: " + err.Error()})
 			return
@@ -61,6 +63,11 @@ func GetLatestPhotos(c *gin.Context) {
 		encoded := base64.StdEncoding.EncodeToString(fileBytes)
 
 		images = append(images, encoded)
+	}
+
+	if len(images) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No images found"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"images": images})
