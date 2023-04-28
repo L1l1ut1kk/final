@@ -3,7 +3,6 @@ package control
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -36,10 +35,28 @@ import (
 func SavePhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "1! " + err.Error()})
+		pkg.HandleError(c, err)
+	}
+
+	if file.Size == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty file"})
 		return
 	}
-	fmt.Println("1")
+
+	// check file type
+	allowedExts := []string{".png", ".jpg", ".jpeg"}
+	ext := filepath.Ext(file.Filename)
+	isAllowedExt := false
+	for _, allowedExt := range allowedExts {
+		if ext == allowedExt {
+			isAllowedExt = true
+			break
+		}
+	}
+	if !isAllowedExt {
+		pkg.HandleError(c, err)
+		return
+	}
 
 	ID := uuid.New().String()
 
@@ -48,14 +65,14 @@ func SavePhoto(c *gin.Context) {
 
 	// save img in new dir
 	if err := c.SaveUploadedFile(file, "uploads/"+filename); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "2! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 
 	// open orig file
 	f, err := os.Open("uploads/" + filename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "3! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	defer f.Close()
@@ -69,7 +86,7 @@ func SavePhoto(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 
@@ -79,21 +96,21 @@ func SavePhoto(c *gin.Context) {
 	negativeFilename := ID + "neg.jpg"
 	negativeFile, err := os.Create("uploads/" + negativeFilename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "5! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	defer negativeFile.Close()
 
 	// encode the negative image
 	if err := jpeg.Encode(negativeFile, negative, nil); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "6! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 
 	// encode the negative image to base64
 	var buf bytes.Buffer
 	if err := jpeg.Encode(&buf, negative, nil); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "8! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	imgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
@@ -101,7 +118,7 @@ func SavePhoto(c *gin.Context) {
 	// insert data into the database
 	err = models.DBInsert(ID, filename, negativeFilename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert data into database: " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 

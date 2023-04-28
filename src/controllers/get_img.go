@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	_ "rest/docs"
+	"rest/pkg"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,15 +31,13 @@ func GetLatestPhotos(c *gin.Context) {
 	conninfo := "user=postgres password=postgres dbname=images sslmode=disable"
 	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database: " + err.Error()})
-		return
+		pkg.HandleError(c, err)
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY Created_at DESC LIMIT 3")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query: " + err.Error()})
-		return
+		pkg.HandleError(c, err)
 	}
 	defer rows.Close()
 
@@ -48,21 +47,18 @@ func GetLatestPhotos(c *gin.Context) {
 		var path string
 		err := rows.Scan(&path)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row: " + err.Error()})
-			return
+			pkg.HandleError(c, err)
 		}
 
 		file, err := os.Open("/home/lutik/Desktop/api/final/uploads/" + filepath.Base(path))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file: " + err.Error()})
-			return
+			pkg.HandleError(c, err)
 		}
 		defer file.Close()
 
 		fileBytes, err := ioutil.ReadAll(file)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file: " + err.Error()})
-			return
+			pkg.HandleError(c, err)
 		}
 
 		encoded := base64.StdEncoding.EncodeToString(fileBytes)
@@ -71,8 +67,7 @@ func GetLatestPhotos(c *gin.Context) {
 	}
 
 	if len(images) == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No images found"})
-		return
+		pkg.HandleError(c, err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"images": images})
