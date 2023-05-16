@@ -1,39 +1,74 @@
 package control
 
 import (
+	"database/sql"
+	"encoding/base64"
+	"io/ioutil"
 	"net/http"
-	"rest/src/models"
+	"os"
+	"path/filepath"
+	_ "rest/docs"
+	"rest/pkg"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Get latest photos example
-//
-// @Summary Get latest uploaded photos
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+// Get latest photos endpoint
+// @Summary Get the 3 latest uploaded photos with original and negative copies
 // @Description Get the 3 latest uploaded photos with original and negative copies
-// @ID photo.getLatest
+// @ID getLatestPhotos
+// @Accept json
 // @Produce json
-// @Success 200 "ok"
-// @Failure 500 string string "Internal Server Error"
-// @Router /get_last_images [get]
-// @Tags            photos
+// @Success 200 {array} string "An array of base64 encoded images"
+// @Failure 500 {object} ErrorResponse
+// @Router /get_latest_photos [get]
+// @Tags photos
 func GetLatestPhotos(c *gin.Context) {
-	var photos []models.Image
+	// Подключаемся к базе данных images
+	var conninfo string = "user=postgres password=postgres dbname=images sslmode=disable host=db"
+	db, err := sql.Open("postgres", conninfo)
+	if err != nil {
+		pkg.HandleError(c, err)
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY Created_at DESC LIMIT 3")
+	if err != nil {
+		pkg.HandleError(c, err)
+	}
+	defer rows.Close()
 
-	// get the last three photos from the database
-	if err := models.Database().Order("id desc").Limit(3).Find(&photos).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	var images []string
+
+	for rows.Next() {
+		var path string
+		err := rows.Scan(&path)
+		if err != nil {
+			pkg.HandleError(c, err)
+		}
+
+		file, err := os.Open("/final/uploads/" + filepath.Base(path))
+		if err != nil {
+			pkg.HandleError(c, err)
+		}
+		defer file.Close()
+
+		fileBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			pkg.HandleError(c, err)
+		}
+
+		encoded := base64.StdEncoding.EncodeToString(fileBytes)
+
+		images = append(images, encoded)
 	}
 
-	// create a JSON object containing the photo paths and pair ID
-	var response []gin.H
-	for _, photo := range photos {
-		response = append(response, gin.H{
-			"orig_path": photo.Path_or,
-			"neg_path":  photo.Path_neg,
-			"id":        photo.ID,
-		})
+	if len(images) == 0 {
+		pkg.HandleError(c, err)
 	}
-	c.JSON(http.StatusOK, response)
+
+	c.JSON(http.StatusOK, gin.H{"images": images})
 }

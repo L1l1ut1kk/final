@@ -13,12 +13,11 @@ import (
 	"rest/src/models"
 	"strings"
 
+	_ "rest/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
-
-type Controller struct {
-}
 
 // Upload example
 //
@@ -36,7 +35,26 @@ type Controller struct {
 func SavePhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "1! " + err.Error()})
+		pkg.HandleError(c, err)
+	}
+
+	if file.Size == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty file"})
+		return
+	}
+
+	// check file type
+	allowedExts := []string{".png", ".jpg", ".jpeg"}
+	ext := filepath.Ext(file.Filename)
+	isAllowedExt := false
+	for _, allowedExt := range allowedExts {
+		if ext == allowedExt {
+			isAllowedExt = true
+			break
+		}
+	}
+	if !isAllowedExt {
+		pkg.HandleError(c, err)
 		return
 	}
 
@@ -47,14 +65,14 @@ func SavePhoto(c *gin.Context) {
 
 	// save img in new dir
 	if err := c.SaveUploadedFile(file, "uploads/"+filename); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "2! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 
 	// open orig file
 	f, err := os.Open("uploads/" + filename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "3! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	defer f.Close()
@@ -68,7 +86,7 @@ func SavePhoto(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 
@@ -76,36 +94,33 @@ func SavePhoto(c *gin.Context) {
 
 	// create a new file for the negative
 	negativeFilename := ID + "neg.jpg"
-	//negativePath := "uploads/" + negativeFilename
 	negativeFile, err := os.Create("uploads/" + negativeFilename)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "5! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	defer negativeFile.Close()
 
 	// encode the negative image
 	if err := jpeg.Encode(negativeFile, negative, nil); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "6! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
-	// save pic  for your pc //pkg.DownloadFile(c, negativePath, negativeFilename)
+
+	// encode the negative image to base64
 	var buf bytes.Buffer
 	if err := jpeg.Encode(&buf, negative, nil); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "8! " + err.Error()})
+		pkg.HandleError(c, err)
 		return
 	}
 	imgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
-	//pkg.DownloadFile(c, "response.json", "response.json")
 
-	// save path in database
-	photo := models.Image{Path_or: "uploads/" + filename, Path_neg: "uploads/" + negativeFilename, ID: ID, ImgBase64: imgBase64}
-	if err := models.Database().Create(&photo).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "7! " + err.Error()})
-
+	// insert data into the database
+	err = models.DBInsert(ID, filename, negativeFilename)
+	if err != nil {
+		pkg.HandleError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"ImgBase64": imgBase64})
-
 }

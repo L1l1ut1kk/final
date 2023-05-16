@@ -1,4 +1,10 @@
-basePath: /api/v1
+basePath: /
+definitions:
+  control.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -9,33 +15,28 @@ info:
   title: Gin image Service
   version: "1.0"
 paths:
-  /get_last_images:
+  /get_latest_photos:
     get:
+      consumes:
+      - application/json
       description: Get the 3 latest uploaded photos with original and negative copies
-      operationId: photo.getLatest
+      operationId: getLatestPhotos
       produces:
       - application/json
       responses:
         "200":
-          description: ok
+          description: An array of base64 encoded images
+          schema:
+            items:
+              type: string
+            type: array
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Get latest uploaded photos
+            $ref: '#/definitions/control.ErrorResponse'
+      summary: Get the 3 latest uploaded photos with original and negative copies
       tags:
       - photos
-  /hello:
-    get:
-      description: first request
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: hello
-      summary: Get hello
-      tags:
-      - hello
   /negative_image:
     post:
       consumes:

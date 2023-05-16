@@ -21,43 +21,35 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/get_last_images": {
+        "/get_latest_photos": {
             "get": {
                 "description": "Get the 3 latest uploaded photos with original and negative copies",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "photos"
                 ],
-                "summary": "Get latest uploaded photos",
-                "operationId": "photo.getLatest",
+                "summary": "Get the 3 latest uploaded photos with original and negative copies",
+                "operationId": "getLatestPhotos",
                 "responses": {
                     "200": {
-                        "description": "ok"
+                        "description": "An array of base64 encoded images",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/control.ErrorResponse"
                         }
-                    }
-                }
-            }
-        },
-        "/hello": {
-            "get": {
-                "description": "first request",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "hello"
-                ],
-                "summary": "Get hello",
-                "responses": {
-                    "200": {
-                        "description": "hello"
                     }
                 }
             }
@@ -107,6 +99,16 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "definitions": {
+        "control.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
     }
 }`
 
@@ -114,7 +116,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Gin image Service",
 	Description:      "Images management service API in Go using Gin framework.",

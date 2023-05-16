@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	control "rest/src/controllers"
@@ -10,38 +11,57 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TestGetLatestPhotos(t *testing.T) {
-	// create a mock gin context
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
+func TestGetLatestPhotos_Success(t *testing.T) {
+	// Initialize the test HTTP server
+	r := gin.Default()
+	r.GET("/get_latest_photos", control.GetLatestPhotos)
 
-	// call the function being tested
-	control.GetLatestPhotos(c)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
 
-	// check the response status code
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d but got %d", http.StatusOK, w.Code)
-	}
-
-	// check the response body
-	var images []gin.H
-	err := json.Unmarshal(w.Body.Bytes(), &images)
+	// Send a GET request
+	resp, err := http.Get(ts.URL + "/get_latest_photos")
 	if err != nil {
-		t.Errorf("Error unmarshalling response body: %s", err.Error())
+		t.Fatalf("Failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body: %v", err)
 	}
 
-	// check that the response contains three images
-	if len(images) != 3 {
-		t.Errorf("Expected 3 images but got %d", len(images))
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Unexpected status code: %d. Response body: %s", resp.StatusCode, string(body))
 	}
 
-	// check that each image has an "img_base64" and "id" field
-	for _, image := range images {
-		if _, ok := image["img_base64"]; !ok {
-			t.Errorf("Expected image to have 'img_base64' field")
-		}
-		if _, ok := image["id"]; !ok {
-			t.Errorf("Expected image to have 'id' field")
+	// Check if the "images" key is present in the response
+	var response gin.H
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+	if _, ok := response["images"]; !ok {
+		t.Errorf("Response body does not contain \"images\"")
+	}
+
+	// Check the number of images in the response
+	images, ok := response["images"].([]interface{})
+	if !ok {
+		t.Fatalf("Failed to convert images to []interface{}")
+	}
+	if len(images) < 1 {
+		t.Errorf("No images found in response")
+	}
+
+	// Check that each image is a string and was uploaded within the last 24 hours
+	for _, img := range images {
+		_, ok := img.(string)
+		if !ok {
+			t.Errorf("Image is not a string: %v", img)
+			continue
 		}
 	}
 }

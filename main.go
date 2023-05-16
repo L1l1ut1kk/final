@@ -1,18 +1,10 @@
 package main
 
 import (
-	"net/http"
-	control "rest/src/controllers"
-
-	//_"rest/bootstrat"
-
-	"github.com/gin-gonic/gin"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
+	"os"
 	_ "rest/docs"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"rest/src/models"
+	routes "rest/src/router"
 )
 
 // @title           Gin image Service
@@ -21,20 +13,12 @@ import (
 // @contact.name   l1l1ut1kk
 // @license.name  Ubuntu 22.04
 // @host      localhost:8080
-// @BasePath  /api/v1
+
+// @BasePath  /
+
 func main() {
-
-	r := gin.Default()
-	r.LoadHTMLGlob("src/templates/*")
-
-	// The url pointing to API definition
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
-	})
-
-	r.POST("/negative_image", control.SavePhoto)
-	r.GET("/get_last_images", control.GetLatestPhotos)
+	os.Setenv("UPLOAD_PHOTO_PATH", "/final/uploads")
+	models.DB()
+	r := routes.NewRouter()
 	r.Run(":8080")
-
 }

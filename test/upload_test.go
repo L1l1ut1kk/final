@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -55,6 +56,7 @@ func TestInvalidFileType(t *testing.T) {
 		t.Errorf("unexpected status code: %d", res.StatusCode)
 	}
 	var response map[string]string
+	fmt.Printf("res.Body: %v\n", res.Body)
 	if err = json.NewDecoder(res.Body).Decode(&response); err != nil {
 		t.Errorf("failed to decode response: %v", err)
 	}
@@ -113,7 +115,7 @@ func TestSaveEmptyFile(t *testing.T) {
 
 	// Проверяем, что сервер вернул ошибку и правильное сообщение об ошибке
 	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
-	assert.Equal(t, "invalid request: empty file", response["error"])
+	assert.Equal(t, "empty file", response["error"])
 }
 
 func TestSavePhoto_Success(t *testing.T) {
