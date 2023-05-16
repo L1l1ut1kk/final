@@ -28,13 +28,13 @@ type ErrorResponse struct {
 // @Router /get_latest_photos [get]
 // @Tags photos
 func GetLatestPhotos(c *gin.Context) {
-	conninfo := "user=postgres password=postgres dbname=images sslmode=disable"
+	// Подключаемся к базе данных images
+	var conninfo string = "user=postgres password=postgres dbname=images sslmode=disable host=db"
 	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
 		pkg.HandleError(c, err)
 	}
 	defer db.Close()
-
 	rows, err := db.Query("SELECT Path_neg FROM images ORDER BY Created_at DESC LIMIT 3")
 	if err != nil {
 		pkg.HandleError(c, err)
@@ -50,7 +50,7 @@ func GetLatestPhotos(c *gin.Context) {
 			pkg.HandleError(c, err)
 		}
 
-		file, err := os.Open("/home/lutik/Desktop/api/final/uploads/" + filepath.Base(path))
+		file, err := os.Open("/final/uploads/" + filepath.Base(path))
 		if err != nil {
 			pkg.HandleError(c, err)
 		}

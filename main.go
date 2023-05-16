@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	_ "rest/docs"
 	"rest/src/models"
 	routes "rest/src/router"
@@ -16,7 +17,7 @@ import (
 // @BasePath  /
 
 func main() {
-
+	os.Setenv("UPLOAD_PHOTO_PATH", "/final/uploads")
 	models.DB()
 	r := routes.NewRouter()
 	r.Run(":8080")

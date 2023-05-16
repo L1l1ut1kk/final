@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+  web:
+    image: l1l1ut1kk/rest_api23:test
+    restart: always
+    environment:
+      UPLOAD_PHOTO_PATH: /final/uploads
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/final/uploads
+    links:
+      - db
+

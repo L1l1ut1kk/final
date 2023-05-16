@@ -47,5 +47,4 @@ func HandleError(c *gin.Context, err error) {
 		Err = err.Error()
 	}
 	c.JSON(http.StatusInternalServerError, gin.H{"error": Err})
-	return
 }

@@ -11,7 +11,7 @@ import (
 
 func DB() {
 	// Указываем параметры подключения к базе данных
-	conninfo := "user=postgres password=postgres dbname=postgres sslmode=disable"
+	var conninfo string = "user=postgres password=postgres dbname=postgres sslmode=disable host=db"
 	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
 		panic(err)
@@ -34,7 +34,7 @@ func DB() {
 	}
 
 	// Подключаемся к базе данных images
-	conninfo = "user=postgres password=postgres dbname=images sslmode=disable"
+	conninfo = "user=postgres password=postgres dbname=images sslmode=disable host=db"
 	db, err = sql.Open("postgres", conninfo)
 	if err != nil {
 		panic(err)
@@ -52,7 +52,7 @@ func DB() {
 
 func DBInsert(ID string, filename string, negativeFilename string) error {
 	// Указываем параметры подключения к базе данных
-	conninfo := "user=postgres password=postgres dbname=images sslmode=disable"
+	var conninfo string = "user=postgres password=postgres dbname=images sslmode=disable host=db"
 	db, err := sql.Open("postgres", conninfo)
 	if err != nil {
 		return err
